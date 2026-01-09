@@ -23,5 +23,13 @@ dist-ssr
 *.sln
 *.sw?
 
-# private keys
+# Private keys and secrets
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# If you use a specific secrets folder
+/secrets
