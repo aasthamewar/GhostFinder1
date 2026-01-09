@@ -12,7 +12,8 @@ import DashboardPage from "./pages/DashboardPage";
 import ProjectPage from "./pages/ProjectPage";
 import ProjectSetupPage from "./pages/ProjectSetupPage";
 import NotFound from "./pages/NotFound";
-
+import ConnectGitHub from "./pages/ConnectGithub";
+import GithubCallback from "./pages/GithubCallback";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -24,6 +25,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/connect-github" element={<ConnectGitHub />} />
+          <Route path="/github-callback" element={<GithubCallback />} />
           <Route path="/role-select" element={<RoleSelectPage />} />
           <Route path="/create-project" element={<CreateProjectPage />} />
           <Route path="/join" element={<JoinPage />} />

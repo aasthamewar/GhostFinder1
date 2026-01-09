@@ -26,7 +26,7 @@ interface Project {
   repo_url: string | null;
   start_date: string;
   end_date: string | null;
-  leader_id: string;
+  //leader_id: string;
   invite_token: string;
 }
 
@@ -62,6 +62,10 @@ const DashboardPage = () => {
     fetchData();
   }, []);
 
+  // ----- ADDING THIS IF SOMEONE DIDN'T ADDED THEIR GITHUB ACCOUNT ------
+
+  
+
   const fetchData = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -69,49 +73,106 @@ const DashboardPage = () => {
         navigate("/auth");
         return;
       }
+
+      // Step 4: Block /dashboard as safety net
+       const { data: profile } = await supabase
+      .from("profiles")
+      .select("github_username")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile?.github_username) {
+      navigate("/connect-github");
+      return;
+    }
       setUserId(user.id);
 
-      // Fetch projects where user is leader
-      const { data: leaderProjects } = await supabase
-        .from("projects")
-        .select("*")
-        .eq("leader_id", user.id);
+      // --------- NEW FETCH UPDATED ---------------
+      // 1️⃣ Get membership (single project assumption)
+    const { data: membership, error: membershipError } = await supabase
+      .from("project_members")
+      .select(`
+        *,
+        projects (
+          id,
+          name,
+          repo_url,
+          start_date,
+          end_date,
+          invite_token,
+          leader_id
+        ),
+        profiles:user_id (
+          email,
+          github_username,
+          avatar_url
+        )
+      `)
+      .eq("user_id", user.id)
+      //.single(); 
+      .limit(1)
+      .maybeSingle();
 
-      // Fetch projects where user is member
-      const { data: memberData } = await supabase
-        .from("project_members")
-        .select(`
-          *,
-          profiles:user_id (email, github_username, avatar_url)
-        `)
-        .eq("user_id", user.id);
 
-      if (leaderProjects && leaderProjects.length > 0) {
-        setProjects(leaderProjects);
-        setIsLeader(true);
-      }
-
-      if (memberData) {
-        setMemberships(memberData);
-        
-        // If not a leader, fetch the projects they're members of
-        if (!leaderProjects || leaderProjects.length === 0) {
-          const projectIds = memberData.map((m) => m.project_id);
-          const { data: memberProjects } = await supabase
-            .from("projects")
-            .select("*")
-            .in("id", projectIds);
-          if (memberProjects) {
-            setProjects(memberProjects);
-          }
-        }
-      }
-    } catch (error) {
-      toast.error("Failed to load dashboard");
-    } finally {
-      setLoading(false);
+    if (membershipError || !membership) {
+      toast.error("You are not part of any project");
+      navigate("/role-select");
+      return;
     }
-  };
+
+    // 2️⃣ Set role clearly
+    setMemberships([membership]);
+    setProjects([membership.projects]);
+    setIsLeader(membership.role === "leader");
+
+  } catch (err) {
+    toast.error("Failed to load dashboard");
+  } finally {
+    setLoading(false);
+  }
+};
+
+      // Fetch projects where user is leader
+  //     const { data: leaderProjects } = await supabase
+  //       .from("projects")
+  //       .select("*")
+  //       .eq("leader_id", user.id);
+
+  //     // Fetch projects where user is member
+  //     const { data: memberData } = await supabase
+  //       .from("project_members")
+  //       .select(`
+  //         *,
+  //         profiles:user_id (email, github_username, avatar_url)
+  //       `)
+  //       .eq("user_id", user.id);
+
+  //     if (leaderProjects && leaderProjects.length > 0) {
+  //       setProjects(leaderProjects);
+  //       setIsLeader(true);
+  //     }
+
+  //     if (memberData) {
+  //       setMemberships(memberData);
+        
+  //       // If not a leader, fetch the projects they're members of
+  //       if (!leaderProjects || leaderProjects.length === 0) {
+  //         const projectIds = memberData.map((m) => m.project_id);
+  //         const { data: memberProjects } = await supabase
+  //           .from("projects")
+  //           .select("*")
+  //           .in("id", projectIds);
+  //         if (memberProjects) {
+  //           setProjects(memberProjects);
+  //         }
+  //       }
+  //     }
+  //   } catch (error) {
+  //     toast.error("Failed to load dashboard");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -128,7 +189,8 @@ const DashboardPage = () => {
   }
 
   // Member's personal view
-  const myMembership = memberships.find((m) => m.user_id === userId);
+  // const myMembership = memberships.find((m) => m.user_id === userId);
+  const myMembership = memberships[0];
   const status = (myMembership?.status as keyof typeof statusConfig) || "active";
   const StatusIcon = statusConfig[status]?.icon || Zap;
 
@@ -291,7 +353,8 @@ const DashboardPage = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                          {project.leader_id === userId ? (
+                        {/* i have change "project.leader_id === userId" with isLeader */}
+                          {isLeader  ? (
                             <Crown className="w-6 h-6 text-primary" />
                           ) : (
                             <Users className="w-6 h-6 text-primary" />
@@ -300,12 +363,14 @@ const DashboardPage = () => {
                         <div>
                           <h3 className="font-semibold text-lg">{project.name}</h3>
                           <p className="text-sm text-muted-foreground">
-                            {project.leader_id === userId ? "You're the leader" : "Team member"}
+                            {/* i have change "project.leader_id === userId" with isLeader */}
+                            {isLeader ? "You're the leader" : "Team member"} 
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        {project.leader_id === userId && (
+                        {/* i have change "project.leader_id === userId" with isLeader */}
+                        {isLeader && (
                           <Badge variant="active">Leader</Badge>
                         )}
                         {project.end_date && (

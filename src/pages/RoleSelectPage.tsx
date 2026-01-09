@@ -12,42 +12,73 @@ const RoleSelectPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
+  // useEffect(() => {
+  //   const checkSession = async () => {
+  //     const { data: { session } } = await supabase.auth.getSession();
+  //     if (!session) {
+  //       navigate("/auth");
+  //       return;
+  //     }
+      
+  //     // Check if user already has projects
+  //     const { data: projects } = await supabase
+  //       .from("projects")
+  //       .select("id")
+  //       .eq("leader_id", session.user.id)
+  //       .limit(1);
+
+  //     const { data: memberships } = await supabase
+  //       .from("project_members")
+  //       .select("id")
+  //       .eq("user_id", session.user.id)
+  //       .limit(1);
+
+  //     if ((projects && projects.length > 0) || (memberships && memberships.length > 0)) {
+  //       navigate("/dashboard");
+  //       return;
+  //     }
+
+  //     setLoading(false);
+  //   };
+
+  //   checkSession();
+  // }, [navigate]);
+
+  // UPDATED ONE
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+    const checkGithubAuth = async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
+
+      if (error || !user) {
         navigate("/auth");
         return;
       }
-      
-      // Check if user already has projects
-      const { data: projects } = await supabase
-        .from("projects")
-        .select("id")
-        .eq("leader_id", session.user.id)
-        .limit(1);
 
-      const { data: memberships } = await supabase
-        .from("project_members")
-        .select("id")
-        .eq("user_id", session.user.id)
-        .limit(1);
+      const githubIdentity = user.identities?.find(
+        (i) => i.provider === "github"
+      );
 
-      if ((projects && projects.length > 0) || (memberships && memberships.length > 0)) {
-        navigate("/dashboard");
+      if (!githubIdentity) {
+        // 🔴 THIS IS WHERE YOUR CODE GOES
+        await supabase.auth.signInWithOAuth({
+          provider: "github",
+          options: {
+            redirectTo: `${window.location.origin}/role-select`
+          }
+        });
         return;
       }
 
       setLoading(false);
     };
 
-    checkSession();
-  }, [navigate]);
+    checkGithubAuth();
+  }, []);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="animate-pulse text-muted-foreground">Connecting GitHub...</div>
       </div>
     );
   }

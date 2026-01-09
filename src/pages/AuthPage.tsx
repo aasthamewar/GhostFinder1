@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,18 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // temporary test  supabase 
+  useEffect(() => {
+  supabase.auth.getSession().then(({ data }) => {
+    console.log("Supabase session:", data.session);
+  });
+    }, []);
+  
+
+    // TEMPORARY ADDING
+    console.log("SUPABASE URL:", import.meta.env.VITE_SUPABASE_URL);
+    console.log("SUPABASE KEY:", import.meta.env.VITE_SUPABASE_ANON_KEY?.slice(0, 10));
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +40,7 @@ const AuthPage = () => {
         });
         if (error) throw error;
         toast.success("Welcome back!");
-        navigate("/role-select");
+        navigate("/connect-github");
       } else {
         const { error } = await supabase.auth.signUp({
           email,
@@ -39,7 +51,7 @@ const AuthPage = () => {
         });
         if (error) throw error;
         toast.success("Account created! Redirecting...");
-        navigate("/role-select");
+        navigate("/connect-github");
       }
     } catch (error: any) {
       toast.error(error.message || "Authentication failed");

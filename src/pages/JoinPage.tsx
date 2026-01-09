@@ -61,6 +61,21 @@ const JoinPage = () => {
         return;
       }
 
+      // ----- ENFORCING GITHUB --------
+       // 1️⃣ Fetch profile
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("github_username")
+        .eq("id", user.id)
+        .single();
+
+      // 2️⃣ Enforce GitHub
+      if (!profile?.github_username) {
+        toast.error("Please connect your GitHub before joining a project");
+        navigate("/connect-github");
+        return;
+      }
+
       // Check if already a member
       const { data: existing } = await supabase
         .from("project_members")
@@ -74,6 +89,7 @@ const JoinPage = () => {
         navigate("/dashboard");
         return;
       }
+
 
       const { error } = await supabase.from("project_members").insert({
         project_id: project.id,
