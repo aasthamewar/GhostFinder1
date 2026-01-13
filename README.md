@@ -1,4 +1,4 @@
-🚀 Ghost Finder
+# 🚀 Ghost Finder
 
 Ghost Finder is a full-stack web application designed to track, visualize, and analyze developer activity in a collaborative environment. It integrates authentication, real-time status indicators, and an activity dashboard to give users a clear view of engagement and progress.
 
@@ -11,7 +11,7 @@ Ghost Finder is a full-stack web application designed to track, visualize, and a
 4. Use heavy tools (Jira, Trello) for simple tracking needs
 These tools add overhead instead of insight.
 
-✅ Solution
+# ✅ Solution
 ##  Ghost Finder provides a minimal, focused dashboard that:
 
 1. Authenticates users securely
@@ -52,7 +52,7 @@ These tools add overhead instead of insight.
 
 * CI/CD via GitHub
 
-🧱 Tech Stack
+# 🧱 Tech Stack
 ## Frontend
 
 * React
