@@ -14,6 +14,7 @@ import ProjectSetupPage from "./pages/ProjectSetupPage";
 import NotFound from "./pages/NotFound";
 import ConnectGitHub from "./pages/ConnectGithub";
 import GithubCallback from "./pages/GithubCallback";
+import ActivityPage from "./pages/ActivityPage";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/join" element={<JoinPage />} />
           <Route path="/join/:token" element={<JoinPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/activity/:projectId" element={<ActivityPage />} />
           <Route path="/project/:projectId" element={<ProjectPage />} />
           <Route path="/project/:projectId/setup" element={<ProjectSetupPage />} />
           <Route path="*" element={<NotFound />} />

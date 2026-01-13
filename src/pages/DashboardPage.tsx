@@ -37,6 +37,7 @@ interface ProjectMember {
   role: string;
   status: string;
   contribution_score: number;
+  dependency_id: string | null;  // Add this field
   profiles: {
     email: string;
     github_username: string | null;
@@ -93,6 +94,7 @@ const DashboardPage = () => {
       .from("project_members")
       .select(`
         *,
+        
         projects (
           id,
           name,
@@ -193,7 +195,7 @@ const DashboardPage = () => {
   const myMembership = memberships[0];
   const status = (myMembership?.status as keyof typeof statusConfig) || "active";
   const StatusIcon = statusConfig[status]?.icon || Zap;
-
+  const projectId = projects[0]?.id;   // ✅ ADD THIS LINE HERE
   return (
     <div className="min-h-screen bg-background">
       {/* Background */}
@@ -232,7 +234,7 @@ const DashboardPage = () => {
               : "Track your contributions and stay visible"}
           </p>
         </motion.div>
-
+        
         {/* Projects Grid */}
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Stats Cards */}
@@ -241,7 +243,16 @@ const DashboardPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <Card variant="gradient" className="h-full">
+            <Card variant="gradient" className="h-fullcursor-pointer hover:scale-[1.02] transition"
+            /* ADDED CLICK ACTION BUTTON-> ACTIVITY*/
+            
+            onClick={() => {
+              if (!projectId) {
+                toast.error("Project not found");
+                return;
+              }
+              navigate(`/activity/${projectId}`);
+            }}>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   Your Status
@@ -254,7 +265,7 @@ const DashboardPage = () => {
                   </div>
                   <div>
                     <p className="text-2xl font-bold">{statusConfig[status]?.label}</p>
-                    <p className="text-sm text-muted-foreground">Current state</p>
+                    <p className="text-sm font-semibold text-foreground">Click to view activity</p>
                   </div>
                 </div>
               </CardContent>
@@ -388,7 +399,7 @@ const DashboardPage = () => {
         </motion.div>
 
         {/* Quick Actions for Members */}
-        {!isLeader && myMembership && (
+        {!isLeader && myMembership && myMembership.dependency_id !== null &&(
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
