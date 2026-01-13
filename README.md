@@ -73,8 +73,7 @@ These tools add overhead instead of insight.
 
 * Vercel
 
-`
-ghost-finder/
+`ghost-finder/
 │
 ├── supabase/              # Supabase client & configuration
 │
@@ -106,13 +105,12 @@ ghost-finder/
 # ⚙️ Environment Variables
 
 Create a .env file:
-` VITE_SUPABASE_URL=your_supabase_project_url
+`VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 `
 
 # 🛠️ Local Setup
-`
-git clone https://github.com/your-username/ghost-finder.git
+`git clone https://github.com/your-username/ghost-finder.git
 cd ghost-finder
 npm install
 npm run dev
