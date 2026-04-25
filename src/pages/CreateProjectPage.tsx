@@ -19,6 +19,8 @@ const CreateProjectPage = () => {
   const [createdProject, setCreatedProject] = useState<{ id: string; invite_token: string } | null>(null);
   const [copied, setCopied] = useState(false);
 
+  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
